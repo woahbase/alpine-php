@@ -35,7 +35,7 @@ CACHEFLAGS := --no-cache=true --pull
 MOUNTFLAGS := -v $(CURDIR)/config:/config  -v $(CURDIR)/config/storage:/storage:ro
 NAMEFLAGS  := --name docker_$(SVCNAME) --hostname $(SVCNAME)
 OTHERFLAGS := -v /etc/hosts:/etc/hosts:ro -v /etc/localtime:/etc/localtime:ro# -e TZ=Asia/Kolkata
-PORTFLAGS  := -p 9000:9000 # for reverse proxying, rebind to 80/443 if needed
+PORTFLAGS  := -p 80:80 -p 443:443
 PROXYFLAGS := --build-arg http_proxy=$(http_proxy) --build-arg https_proxy=$(https_proxy) --build-arg no_proxy=$(no_proxy)
 
 RUNFLAGS   := -e PGID=$(PGID) -e PUID=$(PUID) -e WEBADMIN=admin -e PASSWORD=insecurebydefault -c 256 -m 128m#
