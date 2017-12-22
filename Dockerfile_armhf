@@ -1,0 +1,30 @@
+ARG ARCH=frommakefile
+ARG DOCKERSRC=frommakefile
+ARG USERNAME=frommakefile
+#
+FROM ${USERNAME}/${DOCKERSRC}:${ARCH}
+#
+ARG PUID=1001
+ARG PGID=1001
+#
+RUN set -xe \
+    && apk add --no-cache --purge -uU \
+    php7 \
+    php7-fpm \
+    php7-curl \
+    php7-mcrypt \
+    php7-mbstring \
+    php7-openssl \
+    php7-pcntl \
+    php7-json \
+#   php7-session \
+#   php7-zlib \
+#   php7-apcu \
+#   php7-intl \
+#   php7-posix  \
+    && ln -sf /usr/bin/php7 /usr/bin/php \
+    && rm -rf /var/cache/apk/* /tmp/*
+# add local files
+COPY root/ /
+# ports, volumes etc from nginx
+# ENTRYPOINT ["/init"]

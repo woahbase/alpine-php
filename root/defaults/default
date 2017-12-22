@@ -1,0 +1,93 @@
+server {
+    listen 80;
+    root /config/www;
+    index index.html index.htm index.php;
+
+    server_name http;
+
+    charset utf-8;
+
+    error_page 500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    client_max_body_size 0;
+
+    location ~ ^/secure {
+        error_page 497  https://$host$request_uri;
+        return 301 https://$host$request_uri; # enforce https
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html =404;
+    }
+    location ~ \.php$ {
+        # Prevents autofixing of path which could be used for exploit
+        try_files $uri = 404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        # With php5-cgi alone:
+        # fastcgi_pass 127.0.0.1:9000;
+        # With php5-fpm:
+        fastcgi_pass unix:/run/php-fpm.sock;
+        fastcgi_index index.php;
+        include /etc/nginx/fastcgi_params;
+    }
+}
+
+server {
+    listen 443 ssl;
+    root /config/www;
+    index index.html index.htm index.php;
+
+    server_name https;
+
+    charset utf-8;
+
+    ssl_certificate            /config/keys/certificate.crt;
+    ssl_certificate_key        /config/keys/privatekey.pem;
+    ssl_session_cache          shared:SSL:10m;
+    ssl_session_timeout        10m;
+    ssl_protocols              SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers                AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
+    ssl_prefer_server_ciphers  on;
+
+    error_page 404 /404.html;
+    location = /404.html {
+        root   /usr/share/nginx/html;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    client_max_body_size 0;
+
+    location ~ ^/secure {
+
+        auth_basic "Restricted Area!";
+        auth_basic_user_file "/config/keys/.htpasswd";
+
+        try_files $uri $uri/ /index.html =404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html =404;
+    }
+
+
+    location ~ \.php$ {
+        try_files $uri =404; #Prevents autofixing of path which could be used for exploit
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        # With php5-cgi alone:
+        # fastcgi_pass 127.0.0.1:9000;
+        # With php5-fpm:
+        fastcgi_pass unix:/run/php-fpm.sock;
+        fastcgi_index index.php;
+        include /etc/nginx/fastcgi_params;
+    }
+}
+
+
+
