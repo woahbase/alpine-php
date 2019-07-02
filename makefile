@@ -51,7 +51,7 @@ OTHERFLAGS := -v /etc/hosts:/etc/hosts:ro -v /etc/localtime:/etc/localtime:ro# -
 PORTFLAGS  := -p 80:80 -p 443:443
 
 RUNFLAGS   := -e PGID=$(PGID) -e PUID=$(PUID) \
-	-c 256 -m 128m \
+	-c 256 -m 256m \
 	-e WEBADMIN=admin -e PASSWORD=insecurebydefault
 
 # -- }}}
