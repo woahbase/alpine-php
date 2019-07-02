@@ -2,6 +2,12 @@
 
 # replace this file with custom install script on child images
 
+if [ -n "${APK_EXTRAS}" ];
+then
+    echo "Installing additional packages: ${APK_EXTRAS}";
+    apk add --no-cache -uU ${APK_EXTRAS};
+fi;
+
 # permissions
 chown -R alpine:alpine /config/www
 
