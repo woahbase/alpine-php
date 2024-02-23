@@ -1,0 +1,37 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root WEBDIR;
+    index index.html index.htm index.php;
+
+    server_name _http;
+
+    charset utf-8;
+
+    error_page 500 502 503 504  /50x.html;
+    location = /50x.html { root   /usr/share/nginx/html; }
+
+    client_max_body_size 0;
+
+    location ~ ^/secure {
+        error_page 497  https://$host$request_uri;
+        return 301 https://$host$request_uri; # enforce https
+    }
+
+    location / { try_files $uri $uri/ /index.html =404; }
+    location ~ \.php$ {
+        # Prevents autofixing of path which could be used for exploit
+        try_files $uri = 404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        # With php5-cgi alone:
+        # fastcgi_pass 127.0.0.1:9000;
+        # With php5-fpm:
+        fastcgi_pass unix:/var/run/php-fpm.sock;
+        fastcgi_index index.php;
+        include /etc/nginx/fastcgi_params;
+    }
+
+    # Prevent access to . files (excent the well-known directory)
+    location ~ /\.(?!well-known) { deny all; }
+}

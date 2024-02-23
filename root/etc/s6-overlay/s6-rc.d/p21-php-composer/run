@@ -1,0 +1,53 @@
+#!/usr/bin/with-contenv bash
+set -e
+
+if [ -z "${S6_COMPOSER_REQUIRED}" ]; then exit 0; fi; # enable only when/where needed
+
+PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+COMPOSER_ARGS="${COMPOSER_ARGS:- --no-cache --no-interaction}"
+
+if [ -z "${COMPOSER_VERSION}" ];
+then
+    wget -qO - https://getcomposer.org/installer \
+        | php -- --install-dir=/usr/bin --filename=composer;
+else
+    wget -qO - https://getcomposer.org/installer \
+         | php -- --install-dir=/usr/bin --filename=composer --version=${COMPOSER_VERSION:-required};
+fi;
+
+if [ -n "${S6_COMPOSER_PACKAGES}" ]; # install these globally
+then
+    mkdir -p /usr/local/composer;
+    chmod 1777 /usr/local/composer;
+
+    COMPOSER_BIN_DIR=/usr/local/bin \
+    COMPOSER_VENDOR_DIR=/usr/local/composer \
+    s6-setuidgid root \
+        composer global \
+            require --no-cache ${S6_COMPOSER_PACKAGES};
+fi;
+
+# S6_COMPOSER_PROJECTDIR=""; # path to project passed at runtime, if required
+if [ -n "${S6_COMPOSER_PROJECTDIR}" ]; then
+    if [ ! -d "${S6_COMPOSER_PROJECTDIR}" ]; then # ensure exists and accessible by $PUID/$PGID
+        mkdir -p ${S6_COMPOSER_PROJECTDIR};
+        chown ${S6_USER} ${S6_COMPOSER_PROJECTDIR};
+    fi;
+
+    if [ -z "${S6_COMPOSER_SKIP_INSTALL}" ] \
+    && [ -f "${S6_COMPOSER_PROJECTDIR}/composer.json" ];
+    then
+        if [ -f "${S6_COMPOSER_PROJECTDIR}/composer.lock" ];
+        then
+            cd ${S6_COMPOSER_PROJECTDIR} \
+            && s6-setuidgid \
+                $(ls -ldn . | awk 'NR==1 {print $3":"$4}') \
+                composer install ${COMPOSER_ARGS};
+        else
+            cd ${S6_COMPOSER_PROJECTDIR} \
+            && s6-setuidgid \
+                $(ls -ldn . | awk 'NR==1 {print $3":"$4}') \
+                composer update ${COMPOSER_ARGS};
+        fi;
+    fi;
+fi;

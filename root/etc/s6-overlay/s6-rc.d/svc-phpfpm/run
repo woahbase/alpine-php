@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+set -e
+
+PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+PHPFPM_ARGS="${PHPFPM_ARGS:- -F}";
+
+exec \
+    /usr/sbin/php-fpm${PHPMAJMIN} \
+    ${PHPFPM_ARGS}

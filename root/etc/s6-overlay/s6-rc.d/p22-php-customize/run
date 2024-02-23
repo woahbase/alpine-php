@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+set -e
+
+# replace this file with custom postinstall script on child images
+
+ROOTDIR="${ROOTDIR:-/config}";
+WEBDIR="${WEBDIR:-$ROOTDIR/www}"
+
+# fix permissions
+chown \
+    ${S6_USER:-alpine}:${S6_USER:-alpine} \
+    $WEBDIR

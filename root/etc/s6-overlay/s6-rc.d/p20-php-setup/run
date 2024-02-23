@@ -1,0 +1,70 @@
+#!/usr/bin/with-contenv bash
+set -e
+
+PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+
+ROOTDIR="${ROOTDIR:-/config}";
+PHPDIR="${PHPDIR:-/etc/php$PHPMAJMIN}";
+PHPCONFDIR="${PHPDIR:-/etc/php$PHPMAJMIN/conf.d}";
+PHPFPMDIR="${PHPFPMDIR:-$PHPDIR/php-fpm.d}";
+PHPSOCK="${PHPSOCK:-/var/run/php-fpm.sock}";
+WEBDIR="${WEBDIR:-$ROOTDIR/www}";
+
+# make our folders
+mkdir -p \
+    $PHPDIR \
+    $PHPCONFDIR \
+    $PHPFPMDIR \
+    $WEBDIR \
+    ;
+
+touch $PHPSOCK;
+
+if [ ! -f "$PHPDIR/php.ini" ];
+then
+    sed \
+        -e "s#;date.timezone =.*#date.timezone = ${TZ:-UTC}#g" \
+        -e "s#memory_limit =.*#memory_limit = ${PHP_MEMORY_LIMIT:-128M}#g" \
+        -e "s#upload_max_filesize = .*#upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-16M}#g" \
+    /defaults/php.ini > $PHPDIR/php.ini;
+fi;
+
+if [ ! -f "$PHPDIR/php-fpm.conf" ];
+then
+    sed \
+        -e "s#;error_log = .*/error.log.*#error_log = /proc/self/fd/2#g" \
+        -e "s#;include=/etc/php${PHPMAJMIN}/php-fpm.d/.*#include=$PHPDIR/*.conf#g" \
+    /defaults/php-fpm.conf > $PHPDIR/php-fpm.conf;
+fi;
+
+if [ ! -f "$PHPFPMDIR/www.conf" ];
+then
+    sed \
+        -e "s#user = nobody.*#user = $S6_USER#g" \
+        -e "s#group = nobody.*#group = $S6_USER#g" \
+        -e "s#listen = 127.0.0.1:9000#listen = $PHPSOCK#g" \
+        -e "s#;listen.owner = nobody.*#listen.owner = $S6_USER#g" \
+        -e "s#;listen.group = nobody.*#listen.group = $S6_USER#g" \
+        -e "s#;listen.mode = 0660.*#listen.mode = 0660#g" \
+    /defaults/php-fpm-www.conf > $PHPFPMDIR/www.conf;
+        # -e "s#;request_terminate_timeout = 0#request_terminate_timeout = 30s#g" \
+    #
+fi;
+
+# copy phpinfo if no appdirs
+[[ $(find $WEBDIR -type f -iname '*.php' | wc -l) -eq 0 ]] && \
+    cp /defaults/phpinfo.php $WEBDIR/phpinfo.php;
+
+# fix permissions
+chown \
+    ${S6_USER:-alpine}:${S6_USER:-alpine} \
+    $PHPSOCK \
+    $WEBDIR \
+    ;
+
+chown -R \
+    ${S6_USER:-alpine}:${S6_USER:-alpine} \
+    $PHPDIR \
+    $PHPCONFDIR \
+    $PHPFPMDIR \
+    ;
