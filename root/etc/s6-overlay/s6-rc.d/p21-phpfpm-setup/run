@@ -1,0 +1,70 @@
+#!/usr/bin/with-contenv bash
+set -e
+
+vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
+
+PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+
+ROOTDIR="${ROOTDIR:-/config}";
+PHPDIR="${PHPDIR:-/etc/php$PHPMAJMIN}";
+PHPFPMCONF="${PHPFPMCONF:-$PHPDIR/php-fpm.conf}";
+PHPFPMDIR="${PHPFPMDIR:-$PHPDIR/php-fpm.d}";
+PHPFPMSOCK="${PHPFPMSOCK:-/var/run/php-fpm.sock}";
+
+# make our folders
+vecho "Ensure configuration directories exist.";
+mkdir -p \
+    $PHPFPMDIR \
+    ;
+
+touch $PHPFPMSOCK;
+
+if [ ! -f "$PHPFPMCONF" ];
+then
+    vecho "Setting up /defaults/php-fpm.conf as $PHPFPMCONF";
+    sed \
+        -Ee "s#^;?(include)=/etc/php${PHPMAJMIN}/php-fpm.d/.*#\1=$PHPFPMDIR/*.conf#g" \
+        \
+        -Ee "s#^;?(error_log) = .*#\1 = ${PHPFPM_ERROR_LOG:-/proc/self/fd/2}#g" \
+        -Ee "s#^;?(log_level) = .*#\1 = ${PHPFPM_LOG_LEVEL:-error}#g" \
+        \
+    /defaults/php-fpm.conf > $PHPFPMCONF;
+fi;
+
+if [ ! -f "$PHPFPMDIR/www.conf" ];
+then
+    vecho "Setting up /defaults/php-fpm-www.conf as $PHPFPMDIR/www.conf";
+    sed \
+        -Ee "s#^;?(user) = nobody.*#\1 = $S6_USER#g" \
+        -Ee "s#^;?(group) = nobody.*#\1 = $S6_USER#g" \
+        -Ee "s#^;?(listen.owner) = nobody.*#\1 = $S6_USER#g" \
+        -Ee "s#^;?(listen.group) = nobody.*#\1 = $S6_USER#g" \
+        -Ee "s#^;?(listen.mode) = 0660.*#\1 = 0660#g" \
+        -Ee "s#^;?(listen) = 127.0.0.1:9000#\1 = $PHPFPMSOCK#g" \
+        \
+        -Ee "s#^;?(catch_workers_output) = .*#\1 = ${PHPFPM_CATCH_WORKERS_OUTPUT:-no}#g" \
+        -Ee "s#^;?(clear_env) = .*#\1 = ${PHPFPM_CLEAR_ENV:-yes}#g" \
+        \
+        -Ee "s#^;?(pm) = .*#\1 = ${PHPFPM_PM:-dynamic}#g" \
+        -Ee "s#^;?(pm.max_children) = .*#\1 = ${PHPFPM_PM_MAX_CHILDREN:-5}#g" \
+        -Ee "s#^;?(pm.max_requests) = .*#\1 = ${PHPFPM_PM_MAX_REQUESTS:-500}#g" \
+        -Ee "s#^;?(pm.max_spare_servers) = .*#\1 = ${PHPFPM_PM_MAX_SPARE_SERVERS:-3}#g" \
+        -Ee "s#^;?(pm.min_spare_servers) = .*#\1 = ${PHPFPM_PM_MIN_SPARE_SERVERS:-1}#g" \
+        -Ee "s#^;?(pm.start_servers) = .*#\1 = ${PHPFPM_PM_START_SERVERS:-2}#g" \
+    /defaults/php-fpm-www.conf > $PHPFPMDIR/www.conf;
+        # -Ee "s^#;?request_terminate_timeout = .*#request_terminate_timeout = 30s#g" \
+    #
+fi;
+
+# fix permissions
+vecho "Fixing permissions.";
+chown \
+    ${S6_USER:-alpine}:${S6_USER:-alpine} \
+    $PHPFPMCONF \
+    $PHPFPMSOCK \
+    ;
+
+chown -R \
+    ${S6_USER:-alpine}:${S6_USER:-alpine} \
+    $PHPFPMDIR \
+    ;

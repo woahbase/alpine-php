@@ -10,7 +10,7 @@ server {
     charset utf-8;
 
     error_page 500 502 503 504  /50x.html;
-    location = /50x.html { root   /usr/share/nginx/html; }
+    location = /50x.html { root   /var/lib/nginx/html; }
 
     client_max_body_size 0;
 

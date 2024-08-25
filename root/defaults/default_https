@@ -1,6 +1,7 @@
 server {
-    listen 443 http2 ssl default_server;
-    listen [::]:443 http2 ssl default_server;
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    http2  on;
 
     root WEBDIR;
     index index.html index.htm index.php;
@@ -52,11 +53,11 @@ server {
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
     #ssl_trusted_certificate CERTFILE;
 
-    error_page 404 /404.html;
-    location = /404.html { root   /usr/share/nginx/html; }
+    # error_page 404 /404.html;
+    # location = /404.html { root   /var/lib/nginx/html; }
 
     error_page 500 502 503 504 /50x.html;
-    location = /50x.html { root   /usr/share/nginx/html; }
+    location = /50x.html { root   /var/lib/nginx/html; }
 
     client_max_body_size 0;
 

@@ -2,8 +2,12 @@
 set -e
 
 PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+PHPDIR="${PHPDIR:-/etc/php$PHPMAJMIN}";
+PHPFPMCONF="${PHPFPMCONF:-$PHPDIR/php-fpm.conf}";
 PHPFPM_ARGS="${PHPFPM_ARGS:- -F}";
 
 exec \
     /usr/sbin/php-fpm${PHPMAJMIN} \
+    -c "${PHPDIR}" \
+    -y "${PHPFPMCONF}" \
     ${PHPFPM_ARGS}

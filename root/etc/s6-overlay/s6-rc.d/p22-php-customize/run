@@ -3,10 +3,32 @@ set -e
 
 # replace this file with custom postinstall script on child images
 
+vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
+
 ROOTDIR="${ROOTDIR:-/config}";
 WEBDIR="${WEBDIR:-$ROOTDIR/www}"
 
+# make our folders
+vecho "Ensure webroot directory exist: $WEBDIR";
+mkdir -p \
+    $WEBDIR \
+    ;
+
+# copy phpinfo if no php files exist in webdir
+if [ -n "${PHP_ADD_PHPINFO}" ] \
+&& [ $(find $WEBDIR -type f -iname '*.php' | wc -l) -eq 0 ];
+then
+    vecho "$WEBDIR has no default webpage available.";
+    vecho "Copying a placeholder from /defaults/phpinfo.php.";
+    cp /defaults/phpinfo.php $WEBDIR/phpinfo.php;
+fi;
+
 # fix permissions
-chown \
-    ${S6_USER:-alpine}:${S6_USER:-alpine} \
-    $WEBDIR
+if [ -n "${PHP_PERMFIX_WEBDIR}" ]; # may become cumbersome if WEBDIR has large number of files
+then
+    vecho "Fixing permissions on $WEBDIR files.";
+    chown -R \
+        ${S6_USER:-alpine}:${S6_USER:-alpine} \
+        $WEBDIR \
+        ;
+fi;

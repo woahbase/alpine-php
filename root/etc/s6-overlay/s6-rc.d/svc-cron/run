@@ -1,15 +1,17 @@
 #!/usr/bin/with-contenv bash
 set -e
 
+vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
+
 CROND_ARGS="${CROND_ARGS:- -f -S -l 5}";
 CROND_CONF="${CROND_CONF:-/etc/crontabs}";
 
 if [ -z "${SKIP_CRON}" ];
 then
-    echo "Using ${CROND_CONF} for cron cronfiguration...";
+    vecho "Using ${CROND_CONF} for cron cronfiguration...";
     exec \
         /usr/sbin/crond ${CROND_ARGS} -c ${CROND_CONF}
 else
-    echo "Skip starting cron.";
+    vecho "Skip starting cron.";
     sleep infinity;
 fi;

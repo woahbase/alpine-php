@@ -4,7 +4,7 @@ ARG IMAGEBASE=frommakefile
 #
 FROM ${IMAGEBASE}
 #
-ARG PHPMAJMIN=81
+ARG PHPMAJMIN=82
 #
 ENV \
     PHPMAJMIN=${PHPMAJMIN}
@@ -12,7 +12,7 @@ ENV \
 RUN set -xe \
     && apk add --no-cache --purge -uU \
         php${PHPMAJMIN} \
-        php${PHPMAJMIN}-apcu \
+        php${PHPMAJMIN}-pecl-apcu \
         php${PHPMAJMIN}-common \
         php${PHPMAJMIN}-ctype \
         php${PHPMAJMIN}-curl \
@@ -32,15 +32,17 @@ RUN set -xe \
         php${PHPMAJMIN}-session \
         php${PHPMAJMIN}-sodium \
         php${PHPMAJMIN}-zip \
-        php${PHPMAJMIN}-zlib \
-    && ln -sf /usr/bin/php${PHPMAJMIN}  /usr/bin/php \
-    && ln -sf /usr/bin/pear${PHPMAJMIN} /usr/bin/pear \
-    && ln -sf /usr/bin/pecl${PHPMAJMIN} /usr/bin/pecl \
-    && ln -sf /usr/sbin/php-fpm${PHPMAJMIN} /usr/sbin/php-fpm \
+#
+    && if [ ! -e "/usr/bin/php" ];      then ln -sf /usr/bin/php${PHPMAJMIN}      /usr/bin/php;     fi \
+    && if [ ! -e "/usr/bin/pear" ];     then ln -sf /usr/bin/pear${PHPMAJMIN}     /usr/bin/pear;    fi \
+    && if [ ! -e "/usr/bin/pecl" ];     then ln -sf /usr/bin/pecl${PHPMAJMIN}     /usr/bin/pecl;    fi \
+    && if [ ! -e "/usr/sbin/php-fpm" ]; then ln -sf /usr/sbin/php-fpm${PHPMAJMIN} /usr/bin/php-fpm; fi \
+#
     && mkdir -p /defaults \
     && mv /etc/php${PHPMAJMIN}/php.ini /defaults/php.ini \
     && mv /etc/php${PHPMAJMIN}/php-fpm.conf /defaults/php-fpm.conf \
     && mv /etc/php${PHPMAJMIN}/php-fpm.d/www.conf /defaults/php-fpm-www.conf \
+#
     && rm -rf /var/cache/apk/* /tmp/*
 #
 COPY root/ /
