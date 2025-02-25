@@ -20,15 +20,16 @@ if [ -n "${PHP_ADD_PHPINFO}" ] \
 then
     vecho "$WEBDIR has no default webpage available.";
     vecho "Copying a placeholder from /defaults/phpinfo.php.";
-    cp /defaults/phpinfo.php $WEBDIR/phpinfo.php;
+    cp -p /defaults/phpinfo.php $WEBDIR/phpinfo.php;
 fi;
 
 # fix permissions
 if [ -n "${PHP_PERMFIX_WEBDIR}" ]; # may become cumbersome if WEBDIR has large number of files
 then
     vecho "Fixing permissions on $WEBDIR files.";
-    chown -R \
-        ${S6_USER:-alpine}:${S6_USER:-alpine} \
-        $WEBDIR \
-        ;
+    find $WEBDIR \
+        \! -user ${S6_USER:-alpine} -exec \
+        chown --no-dereference \
+        ${S6_USER:-alpine}:${PGID:-1000} \
+        '{}' +;
 fi;

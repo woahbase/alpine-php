@@ -5,7 +5,7 @@ vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
 
 if [ -z "${S6_COMPOSER_REQUIRED}" ]; then exit 0; fi; # enable only when/where needed
 
-PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+PHPMAJMIN="${PHPMAJMIN:-82}"; # set in Dockerfile
 COMPOSER_ARGS="${COMPOSER_ARGS:- --no-cache --no-interaction}"
 COMPOSER_INSTALL_DIR="${COMPOSER_INSTALL_DIR:-/usr/bin}";
 COMPOSER_BIN_DIR="${COMPOSER_BIN_DIR:-/usr/local/bin}";

@@ -3,7 +3,7 @@ set -e
 
 vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
 
-PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+PHPMAJMIN="${PHPMAJMIN:-82}"; # set in Dockerfile
 
 ROOTDIR="${ROOTDIR:-/config}";
 PHPDIR="${PHPDIR:-/etc/php$PHPMAJMIN}";
@@ -35,9 +35,12 @@ then
 fi;
 
 # fix permissions
-vecho "Fixing permissions.";
-chown -R \
-    ${S6_USER:-alpine}:${S6_USER:-alpine} \
-    $PHPDIR \
-    $PHPCONFDIR \
-    ;
+if [ -z "${PHP_SKIP_PERMFIX}" ]; # may set to 'true' for if configurations are mounted read-only
+then
+    vecho "Fixing permissions.";
+    chown -R \
+        ${S6_USER:-alpine}:${PGID:-1000} \
+        $PHPDIR \
+        $PHPCONFDIR \
+        ;
+fi;

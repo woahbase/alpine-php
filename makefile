@@ -85,6 +85,7 @@ BUILDERFLAGS ?= \
 # runtime flags
 MOUNTFLAGS := \
 	# -v $(CURDIR)/config:/config \
+	# -v $(CURDIR)/config/www:/config/www \
 	# -v /etc/hosts:/etc/hosts:ro \
 	# -v /etc/localtime:/etc/localtime:ro \
 	#
@@ -108,11 +109,12 @@ OTHERFLAGS := \
 	# -e S6_COMPOSER_PACKAGES="laravel/installer" \
 	# -e S6_COMPOSER_REQUIRED=true \
 	# -e S6_COMPOSER_PROJECTDIR=/config/www/project \
+	# -e PHPDIR=/config/php \
 	# -e NGINX_NO_CERTGEN=true \
 	# -e NGINX_NO_HTPASSWD=true \
 	# -e NGINX_NO_HTTP=true \
 	# -e NGINX_NO_HTTPS=true \
-	# -e SSLSUBJECT="/C=US/ST=NY/L=EXAMPLE/O=EXAMPLE/OU=WOAHBase/CN=somewhere.com/emailAddress=everybodycanseethis@mailinator.com" \
+	# -e SSLSUBJECT="/C=US/ST=NY/L=EXAMPLE/O=EXAMPLE/OU=EXAMPLE/CN=*/emailAddress=me@example.com" \
 	# -e TZ=Asia/Kolkata \
 	# -e WEBADMIN=admin \
 	# -e PASSWORD=insecurebydefault \

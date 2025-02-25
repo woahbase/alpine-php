@@ -77,6 +77,6 @@ server {
         # With php5-fpm:
         fastcgi_pass unix:/var/run/php-fpm.sock;
         fastcgi_index index.php;
-        include /etc/nginx/fastcgi_params;
+        include NGINX_FASTCGI_PARAMSFILE;
     }
 }

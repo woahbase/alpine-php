@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bash
 set -e
 
-PHPMAJMIN="${PHPMAJMIN:-81}"; # set in Dockerfile
+PHPMAJMIN="${PHPMAJMIN:-82}"; # set in Dockerfile
 PHPDIR="${PHPDIR:-/etc/php$PHPMAJMIN}";
 PHPFPMCONF="${PHPFPMCONF:-$PHPDIR/php-fpm.conf}";
 PHPFPM_ARGS="${PHPFPM_ARGS:- -F}";
