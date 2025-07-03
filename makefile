@@ -39,6 +39,10 @@ TESTCMD   := \
 ifneq ($(PHPMAJMIN), 84)
 	SKIP_LATESTTAG := 1
 endif
+# no riscv64 for PHPMAJMIN=81
+ifeq ($(PHPMAJMIN), 81)
+	SKIP_riscv64 := 1
+endif
 
 SKIP_loong64 := 1
 # -- }}}
