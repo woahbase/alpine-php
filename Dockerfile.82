@@ -12,7 +12,6 @@ ENV \
 RUN set -xe \
     && apk add --no-cache --purge -uU \
         php${PHPMAJMIN} \
-        php${PHPMAJMIN}-pecl-apcu \
         php${PHPMAJMIN}-common \
         php${PHPMAJMIN}-ctype \
         php${PHPMAJMIN}-curl \
@@ -26,6 +25,7 @@ RUN set -xe \
         php${PHPMAJMIN}-openssl \
         php${PHPMAJMIN}-pcntl \
         php${PHPMAJMIN}-pear \
+        php${PHPMAJMIN}-pecl-apcu \
         php${PHPMAJMIN}-pecl-mcrypt \
         php${PHPMAJMIN}-phar \
         php${PHPMAJMIN}-posix \
@@ -33,10 +33,10 @@ RUN set -xe \
         php${PHPMAJMIN}-sodium \
         php${PHPMAJMIN}-zip \
 #
-    && if [ ! -e "/usr/bin/php" ];      then ln -sf /usr/bin/php${PHPMAJMIN}      /usr/bin/php;     fi \
-    && if [ ! -e "/usr/bin/pear" ];     then ln -sf /usr/bin/pear${PHPMAJMIN}     /usr/bin/pear;    fi \
-    && if [ ! -e "/usr/bin/pecl" ];     then ln -sf /usr/bin/pecl${PHPMAJMIN}     /usr/bin/pecl;    fi \
-    && if [ ! -e "/usr/sbin/php-fpm" ]; then ln -sf /usr/sbin/php-fpm${PHPMAJMIN} /usr/bin/php-fpm; fi \
+    && if [ ! -e "/usr/bin/php" ];      then ln -sf /usr/bin/php${PHPMAJMIN}      /usr/bin/php;       fi \
+    && if [ ! -e "/usr/bin/pear" ];     then ln -sf /usr/bin/pear${PHPMAJMIN}     /usr/bin/pear;      fi \
+    && if [ ! -e "/usr/bin/pecl" ];     then ln -sf /usr/bin/pecl${PHPMAJMIN}     /usr/bin/pecl;      fi \
+    && if [ ! -e "/usr/sbin/php-fpm" ]; then ln -sf /usr/sbin/php-fpm${PHPMAJMIN} /usr/sbin/php-fpm;  fi \
 #
     && mkdir -p /defaults \
     && mv /etc/php${PHPMAJMIN}/php.ini /defaults/php.ini \

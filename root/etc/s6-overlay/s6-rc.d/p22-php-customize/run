@@ -24,7 +24,9 @@ then
 fi;
 
 # fix permissions
-if [ -n "${PHP_PERMFIX_WEBDIR}" ]; # may become cumbersome if WEBDIR has large number of files
+# may become cumbersome if WEBDIR has large number of files
+if [ -n "${PHP_PERMFIX_WEBDIR}" ] \
+&& [ "X${EUID}" == "X0" ]; # requires root
 then
     vecho "Fixing permissions on $WEBDIR files.";
     find $WEBDIR \

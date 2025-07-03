@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+#
+ARG IMAGEBASE=frommakefile
+#
+FROM ${IMAGEBASE}
+#
+ARG PHPMAJMIN=84
+#
+ENV \
+    PHPMAJMIN=${PHPMAJMIN}
+#
+RUN set -xe \
+    && apk add --no-cache --purge -uU \
+        php${PHPMAJMIN} \
+        php${PHPMAJMIN}-common \
+        php${PHPMAJMIN}-ctype \
+        php${PHPMAJMIN}-curl \
+        php${PHPMAJMIN}-dom \
+        php${PHPMAJMIN}-fpm \
+        php${PHPMAJMIN}-gd \
+        php${PHPMAJMIN}-intl \
+        php${PHPMAJMIN}-json \
+        php${PHPMAJMIN}-mbstring \
+        php${PHPMAJMIN}-opcache \
+        php${PHPMAJMIN}-openssl \
+        php${PHPMAJMIN}-pcntl \
+        php${PHPMAJMIN}-pear \
+        php${PHPMAJMIN}-pecl-apcu \
+        # php${PHPMAJMIN}-pecl-mcrypt \
+        php${PHPMAJMIN}-phar \
+        php${PHPMAJMIN}-posix \
+        php${PHPMAJMIN}-session \
+        php${PHPMAJMIN}-sodium \
+        php${PHPMAJMIN}-zip \
+#
+    && if [ ! -e "/usr/bin/php" ];      then ln -sf /usr/bin/php${PHPMAJMIN}      /usr/bin/php;      fi \
+    && if [ ! -e "/usr/bin/pear" ];     then ln -sf /usr/bin/pear${PHPMAJMIN}     /usr/bin/pear;     fi \
+    && if [ ! -e "/usr/bin/pecl" ];     then ln -sf /usr/bin/pecl${PHPMAJMIN}     /usr/bin/pecl;     fi \
+    && if [ ! -e "/usr/sbin/php-fpm" ]; then ln -sf /usr/sbin/php-fpm${PHPMAJMIN} /usr/sbin/php-fpm; fi \
+#
+    && mkdir -p /defaults \
+    && mv /etc/php${PHPMAJMIN}/php.ini /defaults/php.ini \
+    && mv /etc/php${PHPMAJMIN}/php-fpm.conf /defaults/php-fpm.conf \
+    && mv /etc/php${PHPMAJMIN}/php-fpm.d/www.conf /defaults/php-fpm-www.conf \
+#
+    && rm -rf /var/cache/apk/* /tmp/*
+#
+COPY root/ /
+#
+# ports, volumes entrypoint etc from nginx
+# set entrypoint to /usershell for cli/scripts
+# ENTRYPOINT ["/init"]

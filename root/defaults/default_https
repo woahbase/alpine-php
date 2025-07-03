@@ -78,5 +78,6 @@ server {
         fastcgi_pass unix:/var/run/php-fpm.sock;
         fastcgi_index index.php;
         include NGINX_FASTCGI_PARAMSFILE;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 }

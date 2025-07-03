@@ -2,6 +2,8 @@
 set -e
 
 vecho () { if [ "${S6_VERBOSITY:-1}" -gt 0 ]; then echo "[$0] $@"; fi; }
+usercmd () { if [ "X${EUID}" != "X0" ]; then ${1} "${@:2}"; else s6-setuidgid $(ls -ldn . | awk 'NR==1 {print $3":"$4}') ${1} "${@:2}"; fi; }
+# uses projectdir perms instead of PUID/PGID
 
 if [ -z "${S6_COMPOSER_REQUIRED}" ]; then exit 0; fi; # enable only when/where needed
 
@@ -11,7 +13,8 @@ COMPOSER_INSTALL_DIR="${COMPOSER_INSTALL_DIR:-/usr/bin}";
 COMPOSER_BIN_DIR="${COMPOSER_BIN_DIR:-/usr/local/bin}";
 COMPOSER_VENDOR_DIR="${COMPOSER_VENDOR_DIR:-/usr/local/composer}";
 
-if [ -z "${COMPOSER_VERSION}" ];
+if [ -z "${COMPOSER_VERSION}" ] \
+&& [ "X${EUID}" == "X0" ]; # requires root
 then
     vecho "Installing composer:latest";
     wget -qO - https://getcomposer.org/installer \
@@ -22,7 +25,8 @@ else
          | php -- --install-dir=${COMPOSER_INSTALL_DIR} --filename=composer --version=${COMPOSER_VERSION:-required};
 fi;
 
-if [ -n "${S6_COMPOSER_PACKAGES}" ]; # install these globally
+if [ -n "${S6_COMPOSER_PACKAGES}" ] \
+&& [ "X${EUID}" == "X0" ]; # requires root # install these globally
 then
     vecho "Installing composer packages: ${S6_COMPOSER_PACKAGES}";
     mkdir -p ${COMPOSER_VENDOR_DIR};
@@ -39,7 +43,9 @@ fi;
 if [ -n "${S6_COMPOSER_PROJECTDIR}" ]; then
     if [ ! -d "${S6_COMPOSER_PROJECTDIR}" ]; then # ensure exists and accessible by $PUID/$PGID
         mkdir -p ${S6_COMPOSER_PROJECTDIR};
-        chown ${S6_USER} ${S6_COMPOSER_PROJECTDIR};
+        if [ "X${EUID}" == "X0" ];
+        then chown ${S6_USER:-alpine}:${PGID:-1000} ${S6_COMPOSER_PROJECTDIR};
+        fi;
     fi;
 
     if [ -z "${S6_COMPOSER_SKIP_INSTALL}" ] \
@@ -49,14 +55,12 @@ if [ -n "${S6_COMPOSER_PROJECTDIR}" ]; then
         then
             vecho "Installing composer dependencies: ${S6_COMPOSER_PROJECTDIR}/composer.lock";
             cd ${S6_COMPOSER_PROJECTDIR} \
-            && s6-setuidgid \
-                $(ls -ldn . | awk 'NR==1 {print $3":"$4}') \
+            && usercmd \
                 composer install ${COMPOSER_ARGS};
         else
             vecho "Installing composer dependencies: ${S6_COMPOSER_PROJECTDIR}/composer.json";
             cd ${S6_COMPOSER_PROJECTDIR} \
-            && s6-setuidgid \
-                $(ls -ldn . | awk 'NR==1 {print $3":"$4}') \
+            && usercmd \
                 composer update ${COMPOSER_ARGS};
         fi;
     fi;

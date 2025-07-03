@@ -35,7 +35,9 @@ then
 fi;
 
 # fix permissions
-if [ -z "${PHP_SKIP_PERMFIX}" ]; # may set to 'true' for if configurations are mounted read-only
+# may set to 'true' for if configurations are mounted read-only
+if [ -z "${PHP_SKIP_PERMFIX}" ] \
+&& [ "X${EUID}" == "X0" ]; # requires root
 then
     vecho "Fixing permissions.";
     chown -R \
