@@ -11,8 +11,8 @@ ENV \
 #
 RUN set -xe \
     && { REPO=v3.19; \
-                echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/main"; \
-                echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/community"; \
+            echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/main"; \
+            echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/community"; \
        } > /tmp/repo \
     && apk add --no-cache -U --repositories-file /tmp/repo \
         php${PHPMAJMIN} \

@@ -22,7 +22,7 @@ IMAGETAG  ?= $(REGISTRY)/$(ORGNAME)/$(REPONAME):$(ARCH)
 CNTNAME   := docker_$(SVCNAME)
 CNTSHELL  := /bin/bash
 
-PHPMAJMIN := 84
+PHPMAJMIN := 85
 VERSION   ?= $(call get_svc_version)
 
 TESTCMD   := \
@@ -33,10 +33,10 @@ TESTCMD   := \
 	php-fpm -v; \
 	#
 
-# AlpineLinux has multiple versions of php (81...84) in their
+# AlpineLinux has multiple versions of php (81...85) in their
 # repositories. Skip updating latest tag when building an older
 # version so :latest always points to the most recent release.
-ifneq ($(PHPMAJMIN), 84)
+ifneq ($(PHPMAJMIN), 85)
 	SKIP_LATESTTAG := 1
 endif
 # no riscv64 for PHPMAJMIN=81

@@ -26,7 +26,6 @@ RUN set -xe \
         php${PHPMAJMIN}-pcntl \
         php${PHPMAJMIN}-pear \
         php${PHPMAJMIN}-pecl-apcu \
-        # php${PHPMAJMIN}-pecl-mcrypt \
         php${PHPMAJMIN}-phar \
         php${PHPMAJMIN}-posix \
         php${PHPMAJMIN}-session \

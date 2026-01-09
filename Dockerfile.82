@@ -10,7 +10,11 @@ ENV \
     PHPMAJMIN=${PHPMAJMIN}
 #
 RUN set -xe \
-    && apk add --no-cache --purge -uU \
+    && { REPO=v3.22; \
+            echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/main"; \
+            echo "http://dl-cdn.alpinelinux.org/alpine/${REPO}/community"; \
+       } > /tmp/repo \
+    && apk add --no-cache -U --repositories-file /tmp/repo \
         php${PHPMAJMIN} \
         php${PHPMAJMIN}-common \
         php${PHPMAJMIN}-ctype \

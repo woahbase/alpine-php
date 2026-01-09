@@ -29,13 +29,16 @@ if [ -n "${S6_COMPOSER_PACKAGES}" ] \
 && [ "X${EUID}" == "X0" ]; # requires root # install these globally
 then
     vecho "Installing composer packages: ${S6_COMPOSER_PACKAGES}";
-    mkdir -p ${COMPOSER_VENDOR_DIR};
+    mkdir -p \
+        ${COMPOSER_BIN_DIR} \
+        ${COMPOSER_VENDOR_DIR} \
+        ;
     chmod 1777 ${COMPOSER_VENDOR_DIR};
 
     COMPOSER_BIN_DIR=${COMPOSER_BIN_DIR} \
     COMPOSER_VENDOR_DIR=${COMPOSER_VENDOR_DIR} \
     s6-setuidgid root \
-        composer global \
+        ${COMPOSER_INSTALL_DIR}/composer global \
             require --no-cache ${S6_COMPOSER_PACKAGES};
 fi;
 
@@ -56,12 +59,12 @@ if [ -n "${S6_COMPOSER_PROJECTDIR}" ]; then
             vecho "Installing composer dependencies: ${S6_COMPOSER_PROJECTDIR}/composer.lock";
             cd ${S6_COMPOSER_PROJECTDIR} \
             && usercmd \
-                composer install ${COMPOSER_ARGS};
+                ${COMPOSER_INSTALL_DIR}/composer install ${COMPOSER_ARGS};
         else
             vecho "Installing composer dependencies: ${S6_COMPOSER_PROJECTDIR}/composer.json";
             cd ${S6_COMPOSER_PROJECTDIR} \
             && usercmd \
-                composer update ${COMPOSER_ARGS};
+                ${COMPOSER_INSTALL_DIR}/composer update ${COMPOSER_ARGS};
         fi;
     fi;
 fi;
